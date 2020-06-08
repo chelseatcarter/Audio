@@ -190,37 +190,32 @@ void AudioOutputTDM::config_tdm(void)
 	if (I2S0_TCSR & I2S_TCSR_TE) return;
 	if (I2S0_RCSR & I2S_RCSR_RE) return;
 
-	// enable MCLK output
-	I2S0_MCR = I2S_MCR_MICS(MCLK_SRC) | I2S_MCR_MOE;
-	while (I2S0_MCR & I2S_MCR_DUF) ;
-	I2S0_MDR = I2S_MDR_FRACT((MCLK_MULT-1)) | I2S_MDR_DIVIDE((MCLK_DIV-1));
+	// Select input clock 0
+	// Configure to input the bit-clock from pin, bypasses the MCLK divider
+	I2S0_MCR = I2S_MCR_MICS(0);
+	I2S0_MDR = 0;
 
-	// configure transmitter
+	// configure transmitter (sync'ed to receiver clocks)
+	//Transmitter values will be the same as the receiver values
 	I2S0_TMR = 0;
 	I2S0_TCR1 = I2S_TCR1_TFW(4);
-	I2S0_TCR2 = I2S_TCR2_SYNC(0) | I2S_TCR2_BCP | I2S_TCR2_MSEL(1)
-		| I2S_TCR2_BCD | I2S_TCR2_DIV(0);
+	I2S0_TCR2 = I2S_TCR2_SYNC(1) | I2S_TCR2_BCP;
 	I2S0_TCR3 = I2S_TCR3_TCE;
-	I2S0_TCR4 = I2S_TCR4_FRSZ(7) | I2S_TCR4_SYWD(0) | I2S_TCR4_MF
-		| I2S_TCR4_FSE | I2S_TCR4_FSD;
+	I2S0_TCR4 = I2S_TCR4_FRSZ(7) | I2S_TCR4_SYWD(0) | I2S_TCR4_MF | I2S_TCR4_FSE;
 	I2S0_TCR5 = I2S_TCR5_WNW(31) | I2S_TCR5_W0W(31) | I2S_TCR5_FBT(31);
 
-	// configure receiver (sync'd to transmitter clocks)
+	// configure receiver
 	I2S0_RMR = 0;
 	I2S0_RCR1 = I2S_RCR1_RFW(4);
-	I2S0_RCR2 = I2S_RCR2_SYNC(1) | I2S_TCR2_BCP | I2S_RCR2_MSEL(1)
-		| I2S_RCR2_BCD | I2S_RCR2_DIV(0);
+	I2S0_RCR2 = I2S_RCR2_SYNC(0) | I2S_TCR2_BCP;
 	I2S0_RCR3 = I2S_RCR3_RCE;
-	I2S0_RCR4 = I2S_RCR4_FRSZ(7) | I2S_RCR4_SYWD(0) | I2S_RCR4_MF
-		| I2S_RCR4_FSE | I2S_RCR4_FSD;
+	I2S0_RCR4 = I2S_RCR4_FRSZ(7) | I2S_RCR4_SYWD(0) | I2S_RCR4_MF | I2S_RCR4_FSE;
 	I2S0_RCR5 = I2S_RCR5_WNW(31) | I2S_RCR5_W0W(31) | I2S_RCR5_FBT(31);
 
-	// configure pin mux for 3 clock signals
+	// configure pin mux for 2 clock signals
 	CORE_PIN23_CONFIG = PORT_PCR_MUX(6); // pin 23, PTC2, I2S0_TX_FS (LRCLK)
 	CORE_PIN9_CONFIG  = PORT_PCR_MUX(6); // pin  9, PTC3, I2S0_TX_BCLK
-	CORE_PIN11_CONFIG = PORT_PCR_MUX(6); // pin 11, PTC6, I2S0_MCLK
 }
-
 
 
 #endif // KINETISK

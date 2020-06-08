@@ -42,10 +42,16 @@ void AudioInputTDM::begin(void)
 {
 	dma.begin(true); // Allocate the DMA channel first
 
-	// TODO: should we set & clear the I2S_RCSR_SR bit here?
+  	// Enable clock to I2S
+  	SIM_SCGC6 |= SIM_SCGC6_I2S;
+
+  	//configure the BCLK, FS, and RXD0 lines
+  	CORE_PIN11_CONFIG = PORT_PCR_MUX(4); // pin 11, PTC6, I2S0_RX_BCLK
+  	CORE_PIN12_CONFIG = PORT_PCR_MUX(4); // pin 12, PTC7, I2S0_RX_FS
+  	CORE_PIN13_CONFIG = PORT_PCR_MUX(4); // pin 13, PTC5, I2S0_RXD0
+
 	AudioOutputTDM::config_tdm();
 
-	CORE_PIN13_CONFIG = PORT_PCR_MUX(4); // pin 13, PTC5, I2S0_RXD0
 	dma.TCD->SADDR = &I2S0_RDR0;
 	dma.TCD->SOFF = 0;
 	dma.TCD->ATTR = DMA_TCD_ATTR_SSIZE(2) | DMA_TCD_ATTR_DSIZE(2);
@@ -61,7 +67,7 @@ void AudioInputTDM::begin(void)
 	update_responsibility = update_setup();
 	dma.enable();
 
-	I2S0_RCSR |= I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
+  	I2S0_RCSR |= I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
 	I2S0_TCSR |= I2S_TCSR_TE | I2S_TCSR_BCE; // TX clock enable, because sync'd to TX
 	dma.attachInterrupt(isr);
 }
