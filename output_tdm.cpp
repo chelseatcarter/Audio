@@ -209,7 +209,7 @@ void AudioOutputTDM::config_tdm(void)
 	I2S0_RCR1 = I2S_RCR1_RFW(4);
 	I2S0_RCR2 = I2S_TCR2_BCP;
 	I2S0_RCR3 = I2S_RCR3_RCE;
-	I2S0_RCR4 = I2S_RCR4_FRSZ(7) | I2S_RCR4_SYWD(0) | I2S_RCR4_MF | I2S_RCR4_FSE;
+	I2S0_RCR4 = I2S_RCR4_MF | I2S_RCR4_FSE;
 	I2S0_RCR5 = I2S_RCR5_WNW(31) | I2S_RCR5_W0W(31) | I2S_RCR5_FBT(31);
 
 	// configure pin mux for 2 clock signals
